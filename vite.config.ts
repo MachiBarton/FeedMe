@@ -6,8 +6,8 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
 
-  // ✅ 关键配置：使用相对路径，解决 basePath 问题
-  base: './',
+  // ✅ 关键配置：GitHub Pages 部署到 /FeedMe 路径
+  base: '/FeedMe/',
 
   // 构建配置
   build: {
