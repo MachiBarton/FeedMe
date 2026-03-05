@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react()],
 
   // ✅ 关键配置：GitHub Pages 部署到 /FeedMe 路径
-  base: '/FeedMe/',
+  base: '/FeedMe',
 
   // 构建配置
   build: {
