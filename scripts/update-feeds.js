@@ -76,6 +76,12 @@ const OPENAI_API_KEY = process.env.LLM_API_KEY;
 const OPENAI_API_BASE = process.env.LLM_API_BASE;
 const OPENAI_MODEL_NAME = process.env.LLM_NAME;
 
+// 调试输出（隐藏敏感信息）
+console.log('环境变量检查:');
+console.log('  LLM_API_KEY:', OPENAI_API_KEY ? '已设置 (' + OPENAI_API_KEY.slice(0, 10) + '...)' : '未设置');
+console.log('  LLM_API_BASE:', OPENAI_API_BASE || '未设置');
+console.log('  LLM_NAME:', OPENAI_MODEL_NAME || '未设置');
+
 // 检查是否配置了LLM（可选）
 const isLLMConfigured = OPENAI_API_KEY && OPENAI_API_BASE && OPENAI_MODEL_NAME;
 
