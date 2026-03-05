@@ -28,11 +28,7 @@ export const config = {
     //   url: "https://openai.com/news/rss.xml",
     //   category: "科技资讯",
     // },
-    {
-      name: "Github 今日热门",
-      url: "https://rsshub.rssforever.com/github/trending/daily/any",
-      category: "技术",
-    },
+    
     // {
     //   name: "Github 近一周热门",
     //   url: "https://rsshub.rssforever.com/github/trending/weekly/any",
