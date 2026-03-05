@@ -96,9 +96,12 @@ export function ArticlePage() {
     });
   };
 
+  // 清理 sourceUrl（去除末尾的污染字符）
+  const cleanSourceUrl = sourceUrl?.replace(/[^\x20-\x7E]+$/, '') || '';
+
   // 获取来源名称
-  const sourceName = sourceUrl
-    ? findSourceByUrl(sourceUrl)?.name
+  const sourceName = cleanSourceUrl
+    ? findSourceByUrl(cleanSourceUrl)?.name
     : undefined;
 
   if (loading) {
