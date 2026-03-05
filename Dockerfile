@@ -6,14 +6,11 @@ RUN apk update && apk add --no-cache dcron bash procps-ng
 
 WORKDIR /app
 
-# Install pnpm globally
-RUN npm install -g pnpm@8.4.0
-
-# Copy package.json and pnpm-lock.yaml first for dependency caching
-COPY package.json pnpm-lock.yaml ./
+# Copy package.json and package-lock.json first for dependency caching
+COPY package.json package-lock.json ./
 
 # Install project dependencies
-RUN pnpm install --frozen-lockfile
+RUN npm ci
 
 # Copy the rest of the project files
 COPY . .

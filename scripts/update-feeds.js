@@ -56,7 +56,7 @@ if (fs.existsSync(dotenvPath)) {
 const parser = new Parser({
   customFields: {
     item: [
-      ["content:encoded", "content"],
+      ["content:encoded", "contentEncoded"],
       ["dc:creator", "creator"],
       ["summary", "summary"], // 添加对 Atom feed 中 summary 标签的支持
     ],
@@ -68,27 +68,21 @@ const OPENAI_API_KEY = process.env.LLM_API_KEY;
 const OPENAI_API_BASE = process.env.LLM_API_BASE;
 const OPENAI_MODEL_NAME = process.env.LLM_NAME;
 
-// 验证必要的环境变量
-if (!OPENAI_API_KEY) {
-  console.error('环境变量LLM_API_KEY未设置，无法生成摘要');
-  process.exit(1);
+// 检查是否配置了LLM（可选）
+const isLLMConfigured = OPENAI_API_KEY && OPENAI_API_BASE && OPENAI_MODEL_NAME;
+
+if (!isLLMConfigured) {
+  console.warn('⚠️  LLM API未配置，将跳过AI摘要生成（只拉取RSS数据）');
 }
 
-if (!OPENAI_API_BASE) {
-  console.error('环境变量LLM_API_BASE未设置，无法生成摘要');
-  process.exit(1);
+// 创建OpenAI客户端（仅在配置完整时）
+let openai = null;
+if (isLLMConfigured) {
+  openai = new OpenAI({
+    baseURL: OPENAI_API_BASE,
+    apiKey: OPENAI_API_KEY,
+  });
 }
-
-if (!OPENAI_MODEL_NAME) {
-  console.error('环境变量LLM_NAME未设置，无法生成摘要');
-  process.exit(1);
-}
-
-// 创建OpenAI客户端
-const openai = new OpenAI({
-  baseURL: OPENAI_API_BASE,
-  apiKey: OPENAI_API_KEY,
-});
 
 // 确保数据目录存在
 function ensureDataDir() {
@@ -139,6 +133,11 @@ function loadFeedData(sourceUrl) {
 
 // 生成摘要函数
 async function generateSummary(title, content) {
+  // 如果未配置LLM，直接返回null（表示无摘要）
+  if (!isLLMConfigured || !openai) {
+    return null;
+  }
+
   try {
     // 确保 content 不为空
     const contentToClean = content || "";
@@ -147,18 +146,28 @@ async function generateSummary(title, content) {
 
     // 准备提示词
     const prompt = `
-你是一个专业的内容摘要生成器。请根据以下文章标题和内容，生成一个简洁、准确的中文摘要。
-摘要应该：
-1. 捕捉文章的主要观点和关键信息
-2. 使用清晰、流畅的中文
-3. 长度控制在100字左右
-4. 保持客观，不添加个人观点
-5. 如果文章内容为空或不包含有效信息，不要生成文章标题或内容未提及的无关内容。对非中文的标题进行翻译，不需要翻译中文的标题
+你是一位资深情报分析师，请将以下OSINT情报简报提炼为简洁的战略要点。
+
+要求：
+1. 提炼3-5条核心情报，用阿拉伯数字编号（1. 2. 3.）
+2. 每条必须是完整的中文短句，主谓宾齐全，语义通顺
+3. 每条15-25字，准确陈述事件、行动或影响
+4. 使用标准中文，严禁混入外文字母或字符
+5. 国家、地名、组织名必须翻译成标准中文（如Ecuador→厄瓜多尔，Pentagon→五角大楼）
+6. 聚焦地缘政治冲突、网络安全事件、军事动态、技术突破
+7. 去除所有元信息（如"报告包含X篇文章"、"部分来源暂不可用"等）
+8. 保持客观陈述，不添加原文未提及的内容
 
 文章标题：${title}
 
 文章内容：
-${cleanContent.slice(0, 5000)} // 限制内容长度以避免超出token限制
+${cleanContent.slice(0, 5000)}
+
+输出格式示例：
+1. 美国宣布对伊朗实施新一轮经济制裁
+2. 北约加强东欧边境军事部署应对局势
+3. 关键基础设施遭受勒索软件攻击瘫痪
+4. 新型人工智能武器系统进入实战测试
 `;
 
     const completion = await openai.chat.completions.create({
@@ -189,13 +198,14 @@ async function fetchRssFeed(url) {
     // 处理items，确保所有对象都是可序列化的纯对象
     const serializedItems = feed.items.map(item => {
       // 创建新的纯对象
+      // 优先使用 contentEncoded（HTML内容），如果为空则尝试 content、summary（Atom feed），再尝试 contentSnippet
+      const contentHtml = item.contentEncoded || item.content || item.summary || item.contentSnippet || "";
       const serializedItem = {
         title: item.title || "",
         link: item.link || "",
         pubDate: item.pubDate || "",
         isoDate: item.isoDate || "",
-        // 优先使用 content，如果为空则尝试使用 summary（Atom feed），再尝试 contentSnippet
-        content: item.content || item.summary || item.contentSnippet || "",
+        content: contentHtml,
         contentSnippet: item.contentSnippet || "",
         creator: item.creator || "",
       };
@@ -253,15 +263,12 @@ function mergeFeedItems(oldItems = [], newItems = [], maxItems = config.maxItems
       // 为了避免混淆，将 Atom feed 的 summary 移动到 content 字段
       let generatedSummary = existingItem?.summary;
 
-      // 如果 item 有 summary 但没有 content，这可能是 Atom feed 的情况
-      if (!item.content && item.summary && !generatedSummary) {
-        item.content = item.summary; // 将 Atom feed 的 summary 移动到 content
-        item.summary = undefined; // 清除原始的 summary，避免与我们的生成摘要混淆
-      }
+      // 获取 HTML 内容，优先使用 contentEncoded，然后是 content、summary、contentSnippet
+      const contentHtml = item.content || item.contentEncoded || existingItem?.content || "";
 
       const serializedItem = {
         ...item,
-        content: item.content || existingItem?.content || "",
+        content: contentHtml,
         summary: generatedSummary || item.summary, // 保留已生成的摘要
       };
 
@@ -284,40 +291,68 @@ async function updateFeed(sourceUrl) {
   console.log(`更新源: ${sourceUrl}`);
 
   try {
-    // 获取现有数据
+    // 加载老数据
     const existingData = loadFeedData(sourceUrl);
+    const existingItemsMap = new Map();
+    if (existingData?.items) {
+      for (const item of existingData.items) {
+        if (item.link) {
+          existingItemsMap.set(item.link, item);
+        }
+      }
+    }
 
     // 获取新数据
     const newFeed = await fetchRssFeed(sourceUrl);
 
-    // 合并数据，找出需要生成摘要的新条目
-    const { mergedItems, newItemsForSummary } = mergeFeedItems(
-      existingData?.items || [],
-      newFeed.items,
-      config.maxItemsPerFeed,
-    );
+    // 限制条目数量
+    const limitedItems = newFeed.items.slice(0, config.maxItemsPerFeed);
 
-    console.log(`发现 ${newItemsForSummary.length} 条新条目，来自 ${sourceUrl}`);
+    // 对比新老数据：保留相同条目的摘要，为新条目生成摘要
+    let itemsWithSummaries = [];
+    let newItemsCount = 0;
+    let reusedItemsCount = 0;
 
-    // 为新条目生成摘要
-    const itemsWithSummaries = await Promise.all(
-      mergedItems.map(async (item) => {
-        // 如果是新条目且需要生成摘要
-        if (newItemsForSummary.some((newItem) => newItem.link === item.link) && !item.summary) {
+    for (const item of limitedItems) {
+      const existingItem = item.link ? existingItemsMap.get(item.link) : null;
+
+      if (existingItem && existingItem.summary) {
+        // 老数据中有相同条目且有摘要，直接复用
+        itemsWithSummaries.push({
+          ...item,
+          summary: existingItem.summary,
+        });
+        reusedItemsCount++;
+      } else {
+        // 新条目或老数据中没有摘要，需要生成
+        itemsWithSummaries.push(item);
+        newItemsCount++;
+      }
+    }
+
+    // 只有在配置了LLM时才为新条目生成摘要
+    if (isLLMConfigured && newItemsCount > 0) {
+      console.log(`复用 ${reusedItemsCount} 条已有摘要，为 ${newItemsCount} 条新条目生成摘要...`);
+      itemsWithSummaries = await Promise.all(
+        itemsWithSummaries.map(async (item) => {
+          // 如果已经有摘要，跳过
+          if (item.summary) {
+            return item;
+          }
           try {
             // 确保使用任何可用的内容源 - content, item 本身的 summary 字段, 或 contentSnippet
             const contentForSummary = item.content || item.contentSnippet || "";
             const summary = await generateSummary(item.title, contentForSummary);
-            return { ...item, summary };
+            return summary ? { ...item, summary } : item;
           } catch (err) {
             console.error(`为条目 ${item.title} 生成摘要时出错:`, err);
-            return { ...item, summary: "无法生成摘要。" };
+            return item;
           }
-        }
-        // 否则保持不变
-        return item;
-      }),
-    );
+        }),
+      );
+    } else {
+      console.log(`复用 ${reusedItemsCount} 条已有摘要，${newItemsCount} 条新条目（跳过AI摘要生成）`);
+    }
 
     // 创建新的数据对象
     const updatedData = {
@@ -329,7 +364,7 @@ async function updateFeed(sourceUrl) {
       lastUpdated: new Date().toISOString(),
     };
 
-    // 保存到文件
+    // 保存到文件（直接覆盖）
     await saveFeedData(sourceUrl, updatedData);
 
     return updatedData;

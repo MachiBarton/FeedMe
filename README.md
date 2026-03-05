@@ -37,11 +37,13 @@
 
 - **聚合摘要**：一站式整合多源 RSS，通过 LLM 自动生成摘要
 
+- **多布局展示**：支持卡片、紧凑、网格、瀑布流、杂志、文本六种布局，适配不同阅读习惯
+
 - **自动更新**：GitHub Actions / Cron 定时保持内容鲜活
 
 - **灵活部署**：GitHub Pages 零成本静态托管 / Docker 私有化部署
 
-- **现代体验**：响应式设计，明暗主题
+- **现代体验**：响应式设计，明暗主题，无限滚动加载
 
 ---
 
@@ -164,7 +166,7 @@ GitHub Actions 每次构建后会自动推送到 `deploy` 分支，阿里云 ESA
     应用将在 [http://localhost:3000](http://localhost:3000) 上可用。
 
 5.  **自动更新**
-    容器将根据 `src/config/crontab-docker` 中的配置（默认为每 3 小时）自动执行 `pnpm update-feeds` 和 `pnpm build`，并重新启动服务。
+    容器将根据 `src/config/crontab-docker` 中的配置（默认为每 3 小时）自动执行 `npm run update-feeds` 和 `npm run build`，并重新启动服务。
     如需修改更新频率，请编辑 `src/config/crontab-docker` 文件中的 cron 表达式（例如 `0 */6 * * *` 表示每 6 小时执行一次）。
 
 ## 💻 开发
@@ -177,7 +179,7 @@ GitHub Actions 每次构建后会自动推送到 `deploy` 分支，阿里云 ESA
 
 2. **安装依赖**
    ```bash
-   pnpm install
+   npm install
    ```
 
 3. **配置环境变量**
@@ -197,13 +199,13 @@ GitHub Actions 每次构建后会自动推送到 `deploy` 分支，阿里云 ESA
 
 4. **更新 RSS 数据**
    ```bash
-   pnpm update-feeds
+   npm run update-feeds
    ```
    此命令会抓取 RSS 源并生成摘要，保存到 `public/data` 目录
 
 5. **启动开发服务器**
    ```bash
-   pnpm dev
+   npm run dev
    ```
    访问 [http://localhost:3000](http://localhost:3000) 查看应用
 

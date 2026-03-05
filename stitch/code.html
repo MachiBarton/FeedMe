@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2a4074",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#14171e",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>FeedMe - RSS Reader</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-[280px] flex-shrink-0 border-r border-primary/10 bg-white dark:bg-background-dark/50 h-full flex flex-col">
+<div class="p-6">
+<div class="flex items-center gap-2 mb-8">
+<span class="text-2xl">😋</span>
+<h1 class="text-2xl font-bold tracking-tight text-primary">FeedMe</h1>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">article</span>
+<span class="text-sm font-medium">全部文章</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px] fill-1">circle</span>
+<span class="text-sm font-bold">未读文章 (12)</span>
+</a>
+</nav>
+<div class="mt-8">
+<p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">订阅分组</p>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">folder</span>
+<span class="text-sm font-medium">我的订阅</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+<span class="text-sm font-medium">Hacker News 近期最佳</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors pl-10" href="#">
+<span class="text-sm font-medium text-slate-500">OpenAI News</span>
+</a>
+</nav>
+</div>
+</div>
+<div class="mt-auto p-4 border-t border-primary/5">
+<button class="flex w-full items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors text-slate-500">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-sm font-medium">设置</span>
+</button>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col h-full overflow-hidden">
+<!-- Top Navigation -->
+<header class="h-16 border-b border-primary/5 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md flex items-center justify-center px-8 flex-shrink-0 z-10">
+<div class="w-full max-w-2xl relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
+<input class="w-full bg-primary/5 border-none rounded-full py-2 pl-12 pr-16 text-sm focus:ring-2 focus:ring-primary/20 placeholder:text-slate-400" placeholder="搜索文章 (⌘K)" type="text"/>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-40">
+<span class="text-[10px] font-bold border border-slate-400 rounded px-1">⌘</span>
+<span class="text-[10px] font-bold border border-slate-400 rounded px-1">K</span>
+</div>
+</div>
+</header>
+<!-- Scrollable Content Area -->
+<section class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark scroll-smooth">
+<div class="max-w-4xl mx-auto py-8 px-6 space-y-6">
+<!-- Article Card -->
+<article class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-primary/5 overflow-hidden group flex flex-col relative">
+<!-- Unread Indicator Bar -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="p-6 flex flex-col md:flex-row gap-6">
+<!-- Thumbnail -->
+<div class="w-full md:w-48 h-32 flex-shrink-0 rounded-lg bg-cover bg-center" data-alt="Digital representation of AI neural networks and data flows" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAhjC3dsqWgWJ9M1MdwcBh8KH-klBq_VQyH8eshfYzKmv32caZEvwEZVmPf2nt2KTSBz1dHpCaw0_u9mv36PGE9ZtiqMwaUvtJ3nIgshfSF5BFnI0qo_EZ78YXLTTur1eQGVyzVyJpLBpu0SZi5YYbmnjU2GwXJ6K0kDKgQvGV-gjQO_IS1I3qxN1fxv_-nJ7eJStULj_5LebMken4bY7lq_zX20Ast34JeIWrIRSjXlh7gRaT-pjZcxkhRcQ9Avo2mHk4M52BKAZSh')">
+</div>
+<div class="flex-1 space-y-3">
+<div class="flex justify-between items-start gap-4">
+<div>
+<p class="text-xs font-bold text-primary uppercase tracking-wider mb-1">UNREAD</p>
+<h2 class="text-xl font-bold leading-tight group-hover:text-primary transition-colors cursor-pointer">Understanding the Future of AI with Large Language Models</h2>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-primary/5 text-slate-400 hover:text-primary transition-all">
+<span class="material-symbols-outlined text-[20px]">star</span>
+</button>
+<button class="p-2 rounded-full hover:bg-primary/5 text-slate-400 hover:text-primary transition-all">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</button>
+</div>
+</div>
+<p class="text-sm text-slate-500">Published on Oct 24, 2023 by Tech Insights • 5 min read</p>
+<!-- Content Tabs -->
+<div class="pt-2">
+<div class="flex border-b border-primary/5 mb-4">
+<button class="px-4 py-2 text-sm font-bold border-b-2 border-primary text-primary">AI Summary</button>
+<button class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-primary">Original Content</button>
+</div>
+<p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                                        This article explores the trajectory of LLMs and their impact on various industries. Key takeaways include the rapid evolution of multi-modal capabilities, the shift towards specialized small language models for enterprise use, and the emerging challenges in AI safety and alignment that researchers are currently prioritizing for the next decade of development...
+                                    </p>
+</div>
+<div class="flex items-center justify-end pt-4">
+<button class="bg-primary text-white px-6 py-2 rounded-lg text-sm font-bold hover:shadow-lg hover:shadow-primary/20 transition-all">
+                                        阅读全文
+                                    </button>
+</div>
+</div>
+</div>
+</article>
+<!-- Article Card 2 -->
+<article class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-primary/5 overflow-hidden group flex flex-col relative opacity-80">
+<div class="p-6 flex flex-col md:flex-row gap-6">
+<div class="w-full md:w-48 h-32 flex-shrink-0 rounded-lg bg-cover bg-center" data-alt="Close up of a computer motherboard with neon lighting" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBvwb-0pNxm7qMm5sdgpYe_yQE-Nx9I1a7kE5bQtDaBaxT_V2jCoCN9FZDHzFYCO0UiS5z4onWOIV5l_Az6y2sdkvu_mSxdHcmQUCSVCxqTeVxrPfMsR1gzmC1Ev4ncvsbX_AsNBeLI9bZJBu3p257deankPJqujdjCM937-FSsY8xNOuEgV5osLiBSTyYASZsR1o7zTVOantXHj0yeyOvaBjOYN0ryqIam92OGOLUGErIQ7-G7lWgp3ZcT2oyO00XGsMZuHAQwyDea')">
+</div>
+<div class="flex-1 space-y-3">
+<div class="flex justify-between items-start gap-4">
+<div>
+<p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">READ</p>
+<h2 class="text-xl font-bold leading-tight group-hover:text-primary transition-colors cursor-pointer">The Impact of Quantum Computing on Modern Cybersecurity</h2>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-primary/5 text-primary transition-all">
+<span class="material-symbols-outlined text-[20px] fill-1">star</span>
+</button>
+<button class="p-2 rounded-full bg-primary/10 text-primary transition-all">
+<span class="material-symbols-outlined text-[20px] font-bold">done_all</span>
+</button>
+</div>
+</div>
+<p class="text-sm text-slate-500">Published on Oct 22, 2023 by Quantum World • 8 min read</p>
+<div class="pt-2">
+<p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm line-clamp-2">
+                                        As quantum computers scale, traditional encryption methods like RSA are becoming increasingly vulnerable. This deep dive looks at post-quantum cryptography...
+                                    </p>
+</div>
+</div>
+</div>
+</article>
+<!-- Article Card 3 -->
+<article class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-primary/5 overflow-hidden group flex flex-col relative">
+<!-- Unread Indicator Bar -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="p-6 flex flex-col md:flex-row gap-6">
+<div class="w-full md:w-48 h-32 flex-shrink-0 rounded-lg bg-cover bg-center" data-alt="Minimalist workspace with a laptop showing code" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCw8qD6jjHwbyj7LRlNOsEbnduoESJGjMLUUVF2b5-fL80xQq8K3t3p0BmDr5Q6icreZyScQHZud2WIqUER8dOQ288eyTONEavOI_9vwJh-C6tcFLaUMQle94fH8AbSwHAwZ6XuqjwqH0f-C9dK9ULH4_QaL8mGQhXWCgopRWI35l3wqTHfa0kPQXlwFJx50wSG7KYrVCjBWSpm68s-PTBUGLSIola0aInrXCXKFLD1K9vE5S9TE41kVSeBPXYdPne5uMIu-lZlIFvG')">
+</div>
+<div class="flex-1 space-y-3">
+<div class="flex justify-between items-start gap-4">
+<div>
+<p class="text-xs font-bold text-primary uppercase tracking-wider mb-1">UNREAD</p>
+<h2 class="text-xl font-bold leading-tight group-hover:text-primary transition-colors cursor-pointer">Mastering Rust: A Comprehensive Guide for System Devs</h2>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-primary/5 text-slate-400 hover:text-primary transition-all">
+<span class="material-symbols-outlined text-[20px]">star</span>
+</button>
+<button class="p-2 rounded-full hover:bg-primary/5 text-slate-400 hover:text-primary transition-all">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</button>
+</div>
+</div>
+<p class="text-sm text-slate-500">Published on Oct 20, 2023 by Dev Journal • 12 min read</p>
+<div class="pt-2">
+<p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                                        Rust has taken the world by storm. From memory safety without garbage collection to zero-cost abstractions, we break down why it's the future...
+                                    </p>
+</div>
+</div>
+</div>
+</article>
+<!-- Empty state spacer -->
+<div class="py-12 text-center">
+<p class="text-slate-400 text-sm">已经到底啦，刷新看看新内容 ✨</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Right Quick View Sidebar (Optional addition for modern feel) -->
+<aside class="hidden xl:flex w-[320px] flex-shrink-0 border-l border-primary/5 bg-white dark:bg-background-dark/50 h-full flex-col p-6 space-y-8">
+<div class="space-y-4">
+<h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">今日热门</h3>
+<div class="space-y-3">
+<div class="p-3 bg-primary/5 rounded-lg border border-primary/5 cursor-pointer hover:bg-primary/10 transition-colors">
+<p class="text-xs text-primary font-bold mb-1">Hacker News</p>
+<p class="text-sm font-medium leading-tight">Show HN: A new way to read RSS with AI</p>
+</div>
+<div class="p-3 bg-primary/5 rounded-lg border border-primary/5 cursor-pointer hover:bg-primary/10 transition-colors">
+<p class="text-xs text-primary font-bold mb-1">The Verge</p>
+<p class="text-sm font-medium leading-tight">Apple's new vision for spatial computing</p>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">AI 助手建议</h3>
+<div class="p-4 bg-slate-900 text-white rounded-xl space-y-3">
+<p class="text-xs opacity-70 italic">"根据你的阅读习惯，你可能对这些关于『大语言模型』的文章感兴趣。"</p>
+<button class="w-full bg-white text-slate-900 py-2 rounded-lg text-xs font-bold hover:bg-slate-100 transition-colors">
+                        查看相关推荐
+                    </button>
+</div>
+</div>
+</aside>
+</div>
+<!-- Floating Action Button for Mobile -->
+<button class="fixed bottom-6 right-6 md:hidden w-14 h-14 bg-primary text-white rounded-full shadow-xl flex items-center justify-center">
+<span class="material-symbols-outlined">add</span>
+</button>
+</body></html>

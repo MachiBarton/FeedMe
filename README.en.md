@@ -164,7 +164,7 @@ This method uses Docker to run FeedMe locally or on a server. It utilizes an in-
     The application will be available at [http://localhost:3000](http://localhost:3000).
 
 5.  **Automatic Updates**
-    The container will automatically run `pnpm update-feeds` and `pnpm build`, then restart the server based on the schedule in `src/config/crontab-docker` (defaults to every 3 hours).
+    The container will automatically run `npm run update-feeds` and `npm run build`, then restart the server based on the schedule in `src/config/crontab-docker` (defaults to every 3 hours).
     To modify the update frequency, edit the cron expression in the `src/config/crontab-docker` file (e.g., `0 */6 * * *` for updates every 6 hours).
 
 ## 💻 Development
@@ -177,7 +177,7 @@ This method uses Docker to run FeedMe locally or on a server. It utilizes an in-
 
 2. **Install Dependencies**
    ```bash
-   pnpm install
+   npm install
    ```
 
 3. **Configure Environment Variables**
@@ -197,13 +197,13 @@ This method uses Docker to run FeedMe locally or on a server. It utilizes an in-
 
 4. **Update RSS Data**
    ```bash
-   pnpm update-feeds
+   npm run update-feeds
    ```
    This command fetches RSS sources and generates summaries, saving them to the `public/data` directory
 
 5. **Start the Development Server**
    ```bash
-   pnpm dev
+   npm run dev
    ```
    Visit [http://localhost:3000](http://localhost:3000) to view the application
 

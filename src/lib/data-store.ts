@@ -1,24 +1,22 @@
 import { config } from "@/config/rss-config"
-import type { FeedData, FeedItem } from "@/lib/types"
+import type { FeedData, FeedItem, UserSource } from "@/lib/types"
+import { getAllItems } from "@/lib/db"
 
 /**
  * 从静态数据文件加载RSS数据
  * 使用fetch从public/data目录加载JSON文件
  */
-export async function loadFeedData(sourceUrl: string): Promise<FeedData | null> {
+export async function loadFeedData(
+  sourceUrl: string
+): Promise<FeedData | null> {
   try {
     // 使用URL的哈希作为文件名，与GitHub Actions中相同的逻辑
     // 使用浏览器兼容的base64编码
     const sourceHash = btoa(sourceUrl).replace(/[/+=]/g, "_")
 
-    // 获取当前HTML文档的基础路径
-    // 使用pathname（去掉文件名，保留目录）
-    const basePath = window.location.pathname.endsWith('/')
-      ? window.location.pathname
-      : window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)
-
-    // 使用绝对路径从基础路径加载数据文件
-    const dataUrl = `${basePath}data/${sourceHash}.json`
+    // 使用相对于根路径的绝对路径加载数据文件
+    // 这样可以确保在任何页面（包括/article/xxx）都能正确加载
+    const dataUrl = `/data/${sourceHash}.json`
 
     try {
       const response = await fetch(dataUrl)
@@ -28,8 +26,8 @@ export async function loadFeedData(sourceUrl: string): Promise<FeedData | null> 
         return null
       }
 
-      const data = await response.json()
-      return data as FeedData
+      const data = await response.json() as FeedData
+      return data
     } catch (error) {
       console.warn(`No data found for ${sourceUrl}`)
       return null
@@ -41,72 +39,134 @@ export async function loadFeedData(sourceUrl: string): Promise<FeedData | null> 
 }
 
 /**
- * 获取所有缓存的RSS源URL
+ * 加载所有内置源的 Feed 数据
  */
-export async function getAllCachedSources(): Promise<string[]> {
-  // 从配置中获取所有源URL，因为我们无法动态检索文件系统
-  return config.sources.map(source => source.url)
-          }
+export async function loadAllBuiltinFeeds(): Promise<FeedData[]> {
+  const results = await Promise.all(
+    config.sources.map(source => loadFeedData(source.url))
+  )
+  return results.filter((data): data is NonNullable<typeof data> => data !== null)
+}
 
 /**
- * 合并新旧Feed条目
- * 注：此函数在客户端不使用，仅保留用于scripts/update-feeds.js
+ * 加载所有用户自定义源的 Feed 数据
  */
-export async function mergeFeedItems(
-  oldItems: FeedItem[] = [],
-  newItems: FeedItem[] = [],
-  maxItems: number = config.maxItemsPerFeed,
-): Promise<{
-  mergedItems: FeedItem[]
-  newItemsForSummary: FeedItem[]
-}> {
-  // 创建一个Map来存储所有条目，使用链接作为键
-  const itemsMap = new Map<string, FeedItem>()
+export async function loadAllUserFeeds(): Promise<FeedData[]> {
+  try {
+    const userSources = await getAllItems<UserSource>('user_sources')
+    const activeSources = userSources.filter(s => s.isActive)
 
-  // 添加旧条目到Map
-  for (const item of oldItems) {
-    if (item.link) {
-      itemsMap.set(item.link, item)
+    const results = await Promise.all(
+      activeSources.map(source => loadFeedData(source.url))
+    )
+    return results.filter((data): data is NonNullable<typeof data> => data !== null)
+  } catch (error) {
+    console.error('Error loading user feeds:', error)
+    return []
+  }
+}
+
+/**
+ * 合并内置源和用户自定义源
+ */
+export async function getAllSources(): Promise<
+  (UserSource & { type: 'builtin' | 'user' })[]
+> {
+  const builtinSources: (UserSource & { type: 'builtin' | 'user' })[] =
+    config.sources.map((source, index) => ({
+      id: btoa(source.url).replace(/[/+=]/g, '_'),
+      url: source.url,
+      title: source.name,
+      description: '',
+      category: source.category,
+      createdAt: 0,
+      updatedAt: 0,
+      isActive: true,
+      sortOrder: index,
+      type: 'builtin' as const,
+    }))
+
+  try {
+    const userSources = await getAllItems<UserSource>('user_sources')
+    const userSourcesWithType = userSources.map(s => ({
+      ...s,
+      type: 'user' as const,
+    }))
+
+    // 合并并去重（以 URL 为准）
+    const urlSet = new Set(builtinSources.map(s => s.url))
+    const uniqueUserSources = userSourcesWithType.filter(s => !urlSet.has(s.url))
+
+    return [...builtinSources, ...uniqueUserSources].sort(
+      (a, b) => a.sortOrder - b.sortOrder
+    )
+  } catch (error) {
+    console.error('Error loading user sources:', error)
+    return builtinSources
+  }
+}
+
+/**
+ * 获取所有文章（合并所有源）
+ */
+export async function getAllArticles(
+  options: {
+    includeBuiltin?: boolean
+    includeUser?: boolean
+  } = {}
+): Promise<(FeedItem & { sourceUrl: string; sourceTitle: string })[]> {
+  const {
+    includeBuiltin = true,
+    includeUser = true,
+  } = options
+
+  const articles: (FeedItem & { sourceUrl: string; sourceTitle: string })[] = []
+
+  if (includeBuiltin) {
+    const builtinFeeds = await loadAllBuiltinFeeds()
+    for (const feed of builtinFeeds) {
+      articles.push(
+        ...feed.items.map(item => ({
+          ...item,
+          sourceUrl: feed.sourceUrl,
+          sourceTitle: feed.title,
+        }))
+      )
     }
   }
 
-  // 识别需要生成摘要的新条目
-  const newItemsForSummary: FeedItem[] = []
-
-  // 添加新条目到Map，并标记需要生成摘要的条目
-  for (const item of newItems) {
-    if (item.link) {
-      const existingItem = itemsMap.get(item.link)
-
-      if (!existingItem) {
-        // 这是一个新条目，需要生成摘要
-        newItemsForSummary.push(item)
-      }
-
-      // 无论如何都更新Map，使用新条目（但保留旧摘要如果有的话）
-      const serializedItem: FeedItem = {
-        ...item,
-        summary: existingItem?.summary || item.summary,
-      }
-      
-      // 确保enclosure是纯对象，防止序列化问题
-      if (item.enclosure) {
-        serializedItem.enclosure = {
-          url: item.enclosure.url || "",
-          type: item.enclosure.type || "",
-        }
-      }
-      
-      itemsMap.set(item.link, serializedItem)
+  if (includeUser) {
+    const userFeeds = await loadAllUserFeeds()
+    for (const feed of userFeeds) {
+      articles.push(
+        ...feed.items.map(item => ({
+          ...item,
+          sourceUrl: feed.sourceUrl,
+          sourceTitle: feed.title,
+        }))
+      )
     }
   }
 
-  // 将Map转换回数组，但保持原始RSS源的顺序
-  // 使用newItems的顺序作为基准，确保显示的是最新抓取的RSS源顺序
-  const mergedItems = newItems
-    .filter(item => item.link && itemsMap.has(item.link as string))
-    .map(item => item.link ? itemsMap.get(item.link) as FeedItem : item)
-    .slice(0, maxItems); // 只保留指定数量的条目
+  // 按发布日期排序（最新的在前）
+  return articles.sort((a, b) => {
+    const dateA = a.isoDate || a.pubDate || ''
+    const dateB = b.isoDate || b.pubDate || ''
+    return new Date(dateB).getTime() - new Date(dateA).getTime()
+  })
+}
 
-  return { mergedItems, newItemsForSummary }
+/**
+ * 获取所有缓存的RSS源URL（包括用户自定义源）
+ */
+export async function getAllCachedSources(): Promise<string[]> {
+  const builtinUrls = config.sources.map(source => source.url)
+
+  try {
+    const userSources = await getAllItems<UserSource>('user_sources')
+    const userUrls = userSources.filter(s => s.isActive).map(s => s.url)
+    return [...new Set([...builtinUrls, ...userUrls])]
+  } catch (error) {
+    return builtinUrls
+  }
 }

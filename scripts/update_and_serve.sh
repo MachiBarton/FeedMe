@@ -31,7 +31,7 @@ if [ -d "$ORIGINAL_DATA_DIR" ]; then
 fi
 
 # Update RSS feeds in temporary directory
-DATA_DIR=$TEMP_DATA_DIR /usr/local/bin/pnpm update-feeds 2>&1 >> $LOG_FILE
+DATA_DIR=$TEMP_DATA_DIR npm run update-feeds 2>&1 >> $LOG_FILE
 if [ $? -ne 0 ]; then
     echo "$(date): ERROR: Failed to update RSS feeds." | tee -a $LOG_FILE
     rm -rf $TEMP_DIR
@@ -42,7 +42,7 @@ echo "RSS feeds updated successfully in temporary directory." >> $LOG_FILE
 # Build the project
 echo "Building the project..." >> $LOG_FILE
 cd /app
-/usr/local/bin/pnpm build 2>&1 >> $LOG_FILE
+npm run build 2>&1 >> $LOG_FILE
 if [ $? -ne 0 ]; then
     echo "$(date): ERROR: Failed to build the project." | tee -a $LOG_FILE
     rm -rf $TEMP_DIR

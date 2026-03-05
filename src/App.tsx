@@ -1,72 +1,89 @@
 import { Suspense } from 'react';
+import { Router, Route, Switch } from 'wouter';
 import { ThemeProvider } from '@/components/theme-provider';
-import { RssFeed } from '@/components/rss-feed';
-import { SourceSwitcher } from '@/components/source-switcher';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { Sidebar, SidebarLayout } from '@/components/sidebar';
 import { ScrollToTop } from '@/components/scroll-to-top';
-import { defaultSource } from '@/config/rss-config';
-import { Github } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Toaster } from '@/components/ui/toaster';
 
+// 页面组件
+import { HomePage } from '@/pages/home';
+import { SettingsPage } from '@/pages/settings';
+import { ArticlePage } from '@/pages/article';
+import { SourcesPage } from '@/pages/sources';
+import { AboutPage } from '@/pages/about';
+
+/**
+ * 应用主组件
+ * 集成路由、主题、侧边栏布局
+ */
 function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <main className="min-h-screen bg-background">
-        <div className="container py-10 mx-auto max-w-4xl">
-          <div className="flex justify-between items-center mb-6">
-            <a href="./" className="text-4xl font-bold hover:text-primary transition-colors">
-              😋FeedMe
-            </a>
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
-              <a
-                href="https://github.com/Seanium/feedme"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub 仓库"
-              >
-                <Button variant="outline" size="icon" className="relative">
-                  <Github className="h-[1.2rem] w-[1.2rem]" />
-                  <span className="sr-only">GitHub 仓库</span>
-                </Button>
-              </a>
-            </div>
-          </div>
-          <p className="text-muted-foreground mb-8">从多个信息源获取最新内容，由 AI 生成摘要</p>
-
-          <div className="mb-8">
-            <Suspense fallback={<div className="w-full md:w-[300px] h-10 bg-muted rounded-md animate-pulse" />}>
-              <SourceSwitcher />
-            </Suspense>
-          </div>
-
-          <Suspense fallback={<FeedSkeleton />}>
-            <RssFeed defaultSource={defaultSource.url} />
-          </Suspense>
-        </div>
-
-        <footer className="border-t border-border">
-          <div className="container mx-auto max-w-4xl py-6">
-            <p className="text-center text-sm text-muted-foreground">Stay hungry. 😋</p>
-          </div>
-        </footer>
-        <ScrollToTop />
-      </main>
+    <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange>
+      <Router>
+        <AppContent />
+      </Router>
+      <Toaster />
     </ThemeProvider>
   );
 }
 
-function FeedSkeleton() {
+/**
+ * 应用内容组件
+ * 包含侧边栏布局和路由切换
+ */
+function AppContent() {
   return (
-    <div className="space-y-6">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="border rounded-lg p-6 space-y-4 feed-card">
-          <div className="h-7 bg-muted rounded-md animate-pulse w-3/4" />
-          <div className="h-4 bg-muted rounded-md animate-pulse w-1/2" />
+    <SidebarLayout>
+      <div className="min-h-screen bg-background">
+        <main className="container py-6 md:py-10 mx-auto max-w-6xl px-4">
+          <Suspense fallback={<PageSkeleton />}>
+            <Switch>
+              <Route path="/" component={HomePage} />
+              <Route path="/settings" component={SettingsPage} />
+              <Route path="/sources" component={SourcesPage} />
+              <Route path="/article/:id" component={ArticlePage} />
+              <Route path="/about" component={AboutPage} />
+              {/* 404 页面 */}
+              <Route>
+                <div className="flex flex-col items-center justify-center min-h-[50vh]">
+                  <h1 className="text-4xl font-bold mb-4">404</h1>
+                  <p className="text-muted-foreground mb-6">页面未找到</p>
+                  <a href="/" className="text-primary hover:underline">返回首页</a>
+                </div>
+              </Route>
+            </Switch>
+          </Suspense>
+        </main>
+
+        <footer className="border-t border-border mt-auto">
+          <div className="container mx-auto max-w-6xl py-6 px-4">
+            <p className="text-center text-sm text-muted-foreground">
+              Powered by <a href="https://github.com/Seanium/FeedMe" target="_blank" rel="noopener noreferrer" className="hover:text-primary hover:underline">FeedMe</a>
+            </p>
+          </div>
+        </footer>
+        <ScrollToTop />
+      </div>
+    </SidebarLayout>
+  );
+}
+
+/**
+ * 页面加载骨架屏
+ */
+function PageSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="h-8 bg-muted rounded-md w-1/3" />
+      <div className="h-10 bg-muted rounded-md w-full md:w-[300px]" />
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="border rounded-lg p-6 space-y-4">
+          <div className="h-7 bg-muted rounded-md w-3/4" />
+          <div className="h-4 bg-muted rounded-md w-1/2" />
           <div className="space-y-2">
-            <div className="h-4 bg-muted rounded-md animate-pulse w-full" />
-            <div className="h-4 bg-muted rounded-md animate-pulse w-full" />
-            <div className="h-4 bg-muted rounded-md animate-pulse w-4/5" />
+            <div className="h-4 bg-muted rounded-md w-full" />
+            <div className="h-4 bg-muted rounded-md w-full" />
+            <div className="h-4 bg-muted rounded-md w-4/5" />
           </div>
         </div>
       ))}

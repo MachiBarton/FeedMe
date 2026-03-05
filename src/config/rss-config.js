@@ -13,112 +13,127 @@
 // 默认配置
 export const config = {
   sources: [
-    {
-      name: "Hacker News 近期最佳",
-      url: "https://hnrss.org/best",
-      category: "科技资讯",
-    },
-    {
-      name: "Hacker News 历史每日前十",
-      url: "https://rsshub.rssforever.com/github/issue/headllines/hackernews-daily",
-      category: "科技资讯",
-    },
-    {
-      name: "OpenAI News",
-      url: "https://openai.com/news/rss.xml",
-      category: "科技资讯",
-    },
+    // {
+    //   name: "Hacker News 近期最佳",
+    //   url: "https://hnrss.org/best",
+    //   category: "科技资讯",
+    // },
+    // {
+    //   name: "Hacker News 历史每日前十",
+    //   url: "https://rsshub.rssforever.com/github/issue/headllines/hackernews-daily",
+    //   category: "科技资讯",
+    // },
+    // {
+    //   name: "OpenAI News",
+    //   url: "https://openai.com/news/rss.xml",
+    //   category: "科技资讯",
+    // },
     {
       name: "Github 今日热门",
       url: "https://rsshub.rssforever.com/github/trending/daily/any",
-      category: "代码项目",
+      category: "技术",
     },
-    {
-      name: "Github 近一周热门",
-      url: "https://rsshub.rssforever.com/github/trending/weekly/any",
-      category: "代码项目",
-    },
-    {
-      name: "Hugging Face 每日论文",
-      url: "https://rsshub.rssforever.com/huggingface/daily-papers",
-      category: "科研论文",
-    },
-    {
-      name: "Hugging Face 博客",
-      url: "https://rsshub.rssforever.com/huggingface/blog",
-      category: "技术博客",
-    },
-    {
-      name: "Google 开发者博客",
-      url: "https://rsshub.rssforever.com/google/developers/en",
-      category: "技术博客",
-    },
-    {
-      name: "Google 研究博客",
-      url: "https://rsshub.rssforever.com/google/research",
-      category: "技术博客",
-    },
-    {
-      name: "Simon Willison's Weblog",
-      url: "https://simonwillison.net/atom/everything/",
-      category: "技术博客",
-    },
-    {
-      name: "Microsoft Research",
-      url: "https://www.microsoft.com/en-us/research/feed/",
-      category: "技术博客",
-    },
+    // {
+    //   name: "Github 近一周热门",
+    //   url: "https://rsshub.rssforever.com/github/trending/weekly/any",
+    //   category: "代码项目",
+    // },
+    // {
+    //   name: "Hugging Face 每日论文",
+    //   url: "https://rsshub.rssforever.com/huggingface/daily-papers",
+    //   category: "科研论文",
+    // },
+    // {
+    //   name: "Hugging Face 博客",
+    //   url: "https://rsshub.rssforever.com/huggingface/blog",
+    //   category: "技术博客",
+    // },
+    // {
+    //   name: "Google 开发者博客",
+    //   url: "https://rsshub.rssforever.com/google/developers/en",
+    //   category: "技术博客",
+    // },
+    // {
+    //   name: "Google 研究博客",
+    //   url: "https://rsshub.rssforever.com/google/research",
+    //   category: "技术博客",
+    // },
+    // {
+    //   name: "Simon Willison's Weblog",
+    //   url: "https://simonwillison.net/atom/everything/",
+    //   category: "技术博客",
+    // },
+    // {
+    //   name: "Microsoft Research",
+    //   url: "https://www.microsoft.com/en-us/research/feed/",
+    //   category: "技术博客",
+    // },
     // {
     //   name: "Product Hunt 今日热门",
     //   url: "https://rsshub.rssforever.com/producthunt/today",
     //   category: "产品资讯",
     // },
+    // {
+    //   name: "LINUX DO 今日热门",
+    //   url: "https://r4l.deno.dev/https://linux.do/top.rss?period=daily",
+    //   category: "论坛",
+    // },
+    // {
+    //   name: "LINUX DO 近一周热门",
+    //   url: "https://r4l.deno.dev/https://linux.do/top.rss?period=weekly",
+    //   category: "论坛",
+    // },
+    // {
+    //   name: "LINUX DO 近一月热门",
+    //   url: "https://r4l.deno.dev/https://linux.do/top.rss?period=monthly",
+    //   category: "论坛",
+    // },
+    // {
+    //   name: "V2EX 今日热门",
+    //   url: "https://rsshub.rssforever.com/v2ex/topics/hot",
+    //   category: "论坛",
+    // },
+    // {
+    //   name: "Bangumi 近一月热门",
+    //   url: "https://rsshub.rssforever.com/bangumi.tv/anime/followrank",
+    //   category: "番剧资讯",
+    // },
     {
-      name: "LINUX DO 今日热门",
-      url: "https://r4l.deno.dev/https://linux.do/top.rss?period=daily",
-      category: "论坛",
+      name: "OSINT Daily Newsletter",
+      url: "https://buttondown.com/OSINT_Daily_Newsletter/rss",
+      category: "时政、军事",
     },
     {
-      name: "LINUX DO 近一周热门",
-      url: "https://r4l.deno.dev/https://linux.do/top.rss?period=weekly",
-      category: "论坛",
+      name: "橘鸦AI日报",
+      url: "https://imjuya.github.io/juya-ai-daily/rss.xml",
+      category: "AI资讯",
     },
     {
-      name: "LINUX DO 近一月热门",
-      url: "https://r4l.deno.dev/https://linux.do/top.rss?period=monthly",
-      category: "论坛",
-    },
-    {
-      name: "V2EX 今日热门",
-      url: "https://rsshub.rssforever.com/v2ex/topics/hot",
-      category: "论坛",
-    },
-    {
-      name: "Bangumi 近一月热门",
-      url: "https://rsshub.rssforever.com/bangumi.tv/anime/followrank",
-      category: "番剧资讯",
+      name: "Rybar",
+      url: "https://fetchrss.com/feed/1vy4pu4ht9a71vy4p67B87xi.rss",
+      category: "时政、军事",
     },
   ],
   maxItemsPerFeed: 30,
   dataPath: "./public/data",
-}
+};
 
-export const defaultSource = config.sources[0]
+export const defaultSource = config.sources[0];
 
 /**
  * @param {string} url
  * @returns {RssSource | undefined}
  */
 export function findSourceByUrl(url) {
-  return config.sources.find((source) => source.url === url)
+  return config.sources.find((source) => source.url === url);
 }
 
 export function getSourcesByCategory() {
   return config.sources.reduce((acc, source) => {
     if (!acc[source.category]) {
-      acc[source.category] = []
+      acc[source.category] = [];
     }
-    acc[source.category].push(source)
-    return acc
-  }, {})
+    acc[source.category].push(source);
+    return acc;
+  }, {});
 }
