@@ -16,7 +16,9 @@ export async function loadFeedData(
 
     // 使用相对于根路径的绝对路径加载数据文件
     // 这样可以确保在任何页面（包括/article/xxx）都能正确加载
-    const dataUrl = `/data/${sourceHash}.json`
+    // 兼容 GitHub Pages /FeedMe/ 部署路径
+    const basePath = import.meta.env.BASE_URL || '/'
+    const dataUrl = `${basePath}data/${sourceHash}.json`
 
     try {
       const response = await fetch(dataUrl)
