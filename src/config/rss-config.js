@@ -100,7 +100,7 @@ export const config = {
       category: "时政、军事",
     },
     {
-      name: "橘鸦AI日报",
+      name: "juya-ai-daily",
       url: "https://imjuya.github.io/juya-ai-daily/rss.xml",
       category: "AI资讯",
     },
