@@ -15,26 +15,14 @@ import { config } from '../src/config/rss-config.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dotenvPath = path.resolve(process.cwd(), '.env');
-if (fs.existsSync(dotenvPath)) {
-  const dotenvContent = fs.readFileSync(dotenvPath, 'utf8');
-  dotenvContent.split('\n').forEach(line => {
-    const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
-    if (match) {
-      const key = match[1];
-      let value = match[2] || '';
-      if (value.startsWith('"') && value.endsWith('"')) {
-        value = value.replace(/^"|"$/g, '');
-      }
-      process.env[key] = value;
-    }
-  });
-  console.log('已从.env加载环境变量');
-} else {
-  // 尝试加载.env.local作为后备
-  const localEnvPath = path.resolve(process.cwd(), '.env.local');
-  if (fs.existsSync(localEnvPath)) {
-    const dotenvContent = fs.readFileSync(localEnvPath, 'utf8');
+// 检查环境变量是否已通过系统设置（如GitHub Actions Secrets）
+const hasEnvVars = process.env.LLM_API_KEY && process.env.LLM_API_BASE && process.env.LLM_NAME;
+
+if (!hasEnvVars) {
+  // 尝试从.env文件加载
+  const dotenvPath = path.resolve(process.cwd(), '.env');
+  if (fs.existsSync(dotenvPath)) {
+    const dotenvContent = fs.readFileSync(dotenvPath, 'utf8');
     dotenvContent.split('\n').forEach(line => {
       const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
       if (match) {
@@ -46,10 +34,30 @@ if (fs.existsSync(dotenvPath)) {
         process.env[key] = value;
       }
     });
-    console.log('已从.env.local加载环境变量');
+    console.log('已从.env加载环境变量');
   } else {
-    console.warn('未找到.env或.env.local文件，请确保环境变量已设置');
+    // 尝试加载.env.local作为后备
+    const localEnvPath = path.resolve(process.cwd(), '.env.local');
+    if (fs.existsSync(localEnvPath)) {
+      const dotenvContent = fs.readFileSync(localEnvPath, 'utf8');
+      dotenvContent.split('\n').forEach(line => {
+        const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+        if (match) {
+          const key = match[1];
+          let value = match[2] || '';
+          if (value.startsWith('"') && value.endsWith('"')) {
+            value = value.replace(/^"|"$/g, '');
+          }
+          process.env[key] = value;
+        }
+      });
+      console.log('已从.env.local加载环境变量');
+    } else {
+      console.log('未找到.env文件，将使用已设置的环境变量（如有）');
+    }
   }
+} else {
+  console.log('环境变量已通过系统设置加载');
 }
 
 // RSS解析器配置

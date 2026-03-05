@@ -228,7 +228,7 @@ export function Sidebar({
       <div className="flex items-center justify-between h-16 px-4 border-b">
         {!isCollapsed && (
           <a href="./" className="flex items-center gap-2 text-xl font-bold hover:text-primary transition-colors truncate">
-            <img src={`${import.meta.env.BASE_URL}Feed-icon.ico`} alt="RSS" className="h-6 w-6" />
+            <img src="/Feed-icon.ico" alt="RSS" className="h-6 w-6" />
             <span>RSS</span>
           </a>
         )}
