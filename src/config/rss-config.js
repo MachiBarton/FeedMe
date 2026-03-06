@@ -109,6 +109,11 @@ export const config = {
       url: "https://fetchrss.com/feed/1vy4pu4ht9a71vy4p67B87xi.rss",
       category: "时政、军事",
     },
+    {
+      name: "Ars Technica",
+      url: "https://feeds.arstechnica.com/arstechnica/index",
+      category: "科技资讯",
+    },
   ],
   maxItemsPerFeed: 30,
   dataPath: "./public/data",
