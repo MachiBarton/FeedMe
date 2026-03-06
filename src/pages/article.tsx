@@ -20,8 +20,9 @@ function decodeArticleId(articleId: string): { sourceUrl: string; link: string }
     // 还原 base64 字符串（将 _ 替换回原来的字符）
     // generateArticleId 使用: btoa(...).replace(/[/+=]/g, '_')
     // 所以这里需要将 _ 替换回 /、+、=
-    const sourceUrlBase64 = parts[0].replace(/_/g, '/');
-    const linkBase64 = parts[1].replace(/_/g, '/');
+    // 注意：= 只出现在 base64 字符串末尾
+    const sourceUrlBase64 = restoreBase64Chars(parts[0]);
+    const linkBase64 = restoreBase64Chars(parts[1]);
 
     // 解码
     const sourceUrl = atob(sourceUrlBase64);
@@ -32,6 +33,22 @@ function decodeArticleId(articleId: string): { sourceUrl: string; link: string }
     console.error('Failed to decode article ID:', error);
     return null;
   }
+}
+
+/**
+ * 还原 base64 字符串中的特殊字符
+ * 将 _ 替换回 /、+ 或 =（= 只出现在末尾）
+ */
+function restoreBase64Chars(str: string): string {
+  // 先处理末尾的填充符 (= 被替换为 _)
+  // base64 填充符可能有 0、1 或 2 个 =
+  // 我们需要根据字符串长度来判断
+  const withoutPadding = str.replace(/_+$/, '');
+  const paddingLength = str.length - withoutPadding.length;
+  const padding = '='.repeat(paddingLength);
+
+  // 将中间的 _ 替换回 /（+ 很少出现，暂不处理）
+  return withoutPadding.replace(/_/g, '/') + padding;
 }
 
 /**
